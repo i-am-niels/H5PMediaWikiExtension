@@ -1,0 +1,10 @@
+{
+  "@metadata": {
+    "authors": [
+      "iamniels"
+    ]
+  },
+  "h5pextension": "H5pExtension",
+  "h5pextension-desc": "Fügt H5P Funktionalität zu mediawiki hinzu.",
+  "h5pextension-summary": "."
+}
