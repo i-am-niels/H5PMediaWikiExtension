@@ -1,0 +1,45 @@
+{
+  "name": "H5pExtension",
+  "author": "Niels Oldenburg",
+  "url": "https://www.mediawiki.org/wiki/Extension:H5pExtension",
+  "description": "h5pextension-desc",
+  "version": "0.01",
+  "license-name": "MIT",
+  "type": "parserhook",
+  "Hooks": {
+    "ParserFirstCallInit": [
+      "H5pExtension::onParserSetup"
+    ]
+  },
+  "AutoloadClasses": {
+    "H5pExtension": "H5pExtension.php",
+    "H5PPluginClass": "modules/H5PPluginClass.php",
+    "H5PMediawiki":"modules/H5PMediawiki.php",
+    "H5PEventClass":"modules/H5PEventClass.php",
+    "H5PCore": "h5p-php-library/h5p.classes.php",
+    "H5PFrameworkInterface": "h5p-php-library/h5p.classes.php",
+    "H5PContentValidator" : "h5p-php-library/h5p.classes.php",
+    "H5PValidator" : "h5p-php-library/h5p.classes.php",
+    "H5PStorage" : "h5p-php-library/h5p.classes.php",
+    "H5PExport" : "h5p-php-library/h5p.classes.php",
+    "H5PDevelopment" : "h5p-php-library/h5p-development.class.php",
+    "H5PFileStorage" : "h5p-php-library/h5p-file-storage.interface.php",
+    "H5PDefaultStorage" : "h5p-php-library/h5p-default-storage.class.php",
+    "H5PEventBase" : "h5p-php-library/h5p-event-base.class.php",
+    "H5peditor" : "h5p-editor-php-library/h5peditor.class.php",
+    "H5peditorFile" : "h5p-editor-php-library/h5peditor-file.class.php",
+    "H5peditorStorage" : "h5p-editor-php-library/h5peditor-storage.interface.php",
+    "H5PEditorAjaxInterface" : "h5p-editor-php-library/h5peditor-ajax.interface.php",
+    "H5PEditorAjax" : "h5p-editor-php-library/h5peditor-ajax.class.php",
+    "SpecialH5pExtension":"SpecialH5pExtension_body.php"
+  },
+  "SpecialPages" :{
+    "H5pExtension":"SpecialH5pExtension"
+  },
+  "manifest_version": 1,
+  "MessageDirs": {
+    "H5pExtension": [
+      "i18n"
+    ]
+  }
+}
