@@ -22,7 +22,7 @@ class H5pExtension
     public static function onParserSetup(Parser $parser) //pass parser by reference -> not working if you take the code directly from the mediawiki extensions guide
     {
         // When the parser sees the <sample> tag, it executes renderTagSample (see below)
-        $parser->setHook('h5p', 'H5P_Extension::renderH5p');
+        $parser->setHook('h5p', 'H5p_Extension::renderH5p');
     }
 
 }

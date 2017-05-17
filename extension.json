@@ -13,9 +13,9 @@
   },
   "AutoloadClasses": {
     "H5pExtension": "H5pExtension.php",
-    "H5PPluginClass": "modules/H5PPluginClass.php",
-    "H5PMediawiki":"modules/H5PMediawiki.php",
-    "H5PEventClass":"modules/H5PEventClass.php",
+    "H5p_Extension": "modules/H5p_Extension.php",
+    "H5pMediawiki":"modules/H5pMediawiki.php",
+    "H5pEventClass":"modules/H5pEventClass.php",
     "H5PCore": "h5p-php-library/h5p.classes.php",
     "H5PFrameworkInterface": "h5p-php-library/h5p.classes.php",
     "H5PContentValidator" : "h5p-php-library/h5p.classes.php",
