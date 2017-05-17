@@ -10,15 +10,26 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 * Load language file(JSON) from database.
 	 * This is used to translate the editor fields(title, description etc.)
 	 *
-	 * @param string $name The machine readable name of the library(content type)
-	 * @param int $major Major part of version number
-	 * @param int $minor Minor part of version number
-	 * @param string $lang Language code
+	 * @param string $machineName The machine readable name of the library(content type)
+	 * @param int $majorVersion part of version number
+	 * @param int $minorVersion part of version number
+	 * @param string $language Language code
 	 *
 	 * @return string Translation in JSON format
 	 */
 	public function getLanguage( $machineName, $majorVersion, $minorVersion, $language ) {
-		// TODO: Implement getLanguage() method.
+
+		global $dbr;
+		$dbr=wfGetDB(DB_REPLICA);
+
+		return $dbr->select(
+			array('hlt'=>'h5p_libraries_languages','hl'=>'h5p_libraries'),
+			'hlt.translation',
+			array('hl.name'=> $machineName ,'hl.major_version'=> $majorVersion, 'hl.minor_version'=> $minorVersion, 'hlt.language_code'=>$language),
+			__METHOD__,
+			'',
+			array('hl'=> array('JOIN',array('hl.id = hlt.library_id')))
+		);
 	}
 
 	/**
@@ -28,7 +39,13 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 * @param int $fileId
 	 */
 	public function keepFile( $fileId ) {
-		// TODO: Implement keepFile() method.
+		global $dbw;
+		$dbw = wfGetDB(DB_MASTER);
+		$dbw -> delete(
+			'mw_h5p_tmpfiles',
+			array('path' => $fileId),
+			__METHOD__
+		);
 	}
 
 	/**
@@ -46,7 +63,76 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 * @return array List of all libraries loaded
 	 */
 	public function getLibraries( $libraries = null ) {
-		// TODO: Implement getLibraries() method.
+		global $dbr;
+		$dbr = wfGetDB(DB_REPLICA);
+		//$superUser = RequestContext::getMain()->getUser()->isAllowed('manage_h5p_libraries');
+		$superUser = true;
+
+
+		if ($libraries !== NULL) {
+			// Get details for the specified libraries only.
+			$librariesWithDetails = array();
+			foreach ($libraries as $library) {
+				// Look for library
+
+				$details = $dbr -> selectRow(
+					'mw_h5p_libraries',
+					'title, runnable, restricted, tutorial_url',
+					array('name' => $library->name, 'major_version' => $library->majorVersion, 'minor_version' => $library->minorVersion, 'semantics IS NOT NULL'),
+						__METHOD__,
+						'');
+
+				if ($details) {
+					// Library found, add details to list
+					$library->tutorialUrl = $details->tutorial_url;
+					$library->title = $details->title;
+					$library->runnable = $details->runnable;
+					$library->restricted = $superUser ? FALSE : ($details->restricted === '1' ? TRUE : FALSE);
+					$librariesWithDetails[] = $library;
+				}
+			}
+
+			// Done, return list with library details
+			return $librariesWithDetails;
+		}
+
+		// Load all libraries
+		$libraries = array();
+
+		$libraries_result = $dbr->select(
+			'mw_h5p_libraries',
+			array('name','title','majorVersion'=>'major_version','minorVersion'=>'minor_version','tutorialUrl'=>'tutorial_url','restricted'),
+			array('runnable = 1','semantics IS NOT NULL'),
+			__METHOD__,
+			'ORDER BY title'
+		);
+
+		foreach ($libraries_result as $library) {
+			// Make sure we only display the newest version of a library.
+			foreach ($libraries as $key => $existingLibrary) {
+				if ($library->name === $existingLibrary->name) {
+
+					// Found library with same name, check versions
+					if ( ( $library->majorVersion === $existingLibrary->majorVersion &&
+					       $library->minorVersion > $existingLibrary->minorVersion ) ||
+					     ( $library->majorVersion > $existingLibrary->majorVersion ) ) {
+						// This is a newer version
+						$existingLibrary->isOld = TRUE;
+					}
+					else {
+						// This is an older version
+						$library->isOld = TRUE;
+					}
+				}
+			}
+
+			// Check to see if content type should be restricted
+			$library->restricted = $superUser ? FALSE : ($library->restricted === '1' ? TRUE : FALSE);
+
+			// Add new library
+			$libraries[] = $library;
+		}
+		return $libraries;
 	}
 
 	/**
@@ -59,7 +145,8 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 *  have majorVersion and minorVersion as properties.
 	 */
 	public function alterLibraryFiles( &$files, $libraries ) {
-		// TODO: Implement alterLibraryFiles() method.
+		$plugin = H5p_Extension::get_instance();
+		$plugin->alter_assets($files, $libraries, 'editor');
 	}
 
 	/**
@@ -73,18 +160,68 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 *  if saving succeeded
 	 */
 	public static function saveFileTemporarily( $data, $move_file ) {
-		// TODO: Implement saveFileTemporarily() method.
+		// Get temporary path
+		$plugin = H5p_Extension::get_instance();
+		$interface = $plugin->get_h5p_instance('interface');
+
+		$path = $interface->getUploadedH5pPath();
+
+		if ($move_file) {
+			// Move so core can validate the file extension.
+			rename($data, $path);
+		}
+		else {
+			// Create file from data
+			file_put_contents($path, $data);
+		}
+
+		return (object) array (
+			'dir' => dirname($path),
+			'fileName' => basename($path)
+		);
 	}
 
 	/**
 	 * Marks a file for later cleanup, useful when files are not instantly cleaned
 	 * up. E.g. for files that are uploaded through the editor.
 	 *
-	 * @param H5peditorFile
+	 * @param $file H5peditorFile
 	 * @param $content_id
 	 */
 	public static function markFileForCleanup( $file, $content_id ) {
-		// TODO: Implement markFileForCleanup() method.
+
+		global $dbw;
+		$dbw =wfGetDB(DB_MASTER);
+
+		$plugin = H5p_Extension::get_instance();
+		$path   = $plugin->get_h5p_path();
+
+		if (empty($content_id)) {
+			// Should be in editor tmp folder
+			$path .= '/editor';
+		}
+		else {
+			// Should be in content folder
+			$path .= '/content/' . $content_id;
+		}
+
+		// Add file type to path
+		$path .= '/' . $file->getType() . 's';
+
+		// Add filename to path
+		$path .= '/' . $file->getName();
+
+		// Keep track of temporary files so they can be cleaned up later.
+		$dbw->insert(
+		'mw_h5p_tmpfiles',
+			array('path'=> $path, 'created_at' => time()),
+		__METHOD__,
+		''
+		);
+
+		// TODO: take a look at delete_transient()
+		// Clear cached value for dirsize.
+		//delete_transient('dirsize_cache');
 	}
 
 	/**
@@ -93,7 +230,11 @@ class H5pMediawikiEditorStorage implements H5peditorStorage {
 	 * @param string $filePath Path to file or directory
 	 */
 	public static function removeTemporarilySavedFiles( $filePath ) {
-		// TODO: Implement removeTemporarilySavedFiles() method.
+		if (is_dir($filePath)) {
+			H5PCore::deleteFileTree($filePath);
+		}
+		else {
+			unlink($filePath);
+		}
 	}
-
 }
