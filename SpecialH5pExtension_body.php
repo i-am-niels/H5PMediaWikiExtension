@@ -16,13 +16,14 @@ class SpecialH5pExtension extends SpecialPage{
 		$output = $this -> getOutput();
 		$this->setHeaders();
 
-		$param = $request->getText( 'param');
+		//$param = $request->getText( 'param');
 
 		# Do stuff
 
 		$wikitext = 'H5P! <br />'.PHP_EOL;
 		$wikitext .= '<h5p>1</h5p><br />'.PHP_EOL;
 		$wikitext .= 'Testseite ist testierbar<br />'.PHP_EOL;
+		$wikitext .= 'UserID: '.$request->getSession()->getUser()->getId();
 
 		$output->addWikiText($wikitext);
 	}
