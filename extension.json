@@ -31,6 +31,8 @@
     "H5peditorStorage" : "h5p-editor-php-library/h5peditor-storage.interface.php",
     "H5PEditorAjaxInterface" : "h5p-editor-php-library/h5peditor-ajax.interface.php",
     "H5PEditorAjax" : "h5p-editor-php-library/h5peditor-ajax.class.php",
+    "H5pExtensionMediawikiEditorStorage" : "Editor/H5pExtensionMediawikiEditorStorage.php",
+    "H5pExtensionMediawikiEditorAjax" : "Editor/H5pExtensionMediawikiEditorAjax.php",
     "SpecialH5pExtension":"SpecialH5pExtension_body.php"
   },
   "SpecialPages" :{
@@ -41,5 +43,52 @@
     "H5pExtension": [
       "i18n"
     ]
+  },
+  "ResourceModules": {
+    "ext.H5pExtension.editor": {
+      "scripts": [
+        "h5p-editor-php-library/scripts/h5p-hub-client.js",
+        "h5p-editor-php-library/scripts/h5peditor-selector-hub.js",
+        "h5p-editor-php-library/scripts/h5peditor.js",
+        "h5p-editor-php-library/scripts/h5peditor-editor.js",
+        "h5p-php-library/js/jquery.js",
+        "h5p-php-library/js/h5p.js",
+        "h5p-php-library/js/h5p-event-dispatcher.js",
+        "h5p-php-library/js/h5p-x-api.js",
+        "h5p-php-library/js/h5p-x-api-event.js",
+        "h5p-php-library/js/h5p-content-type.js",
+        "h5p-php-library/js/h5p-confirmation-dialog.js",
+        "h5p-php-library/js/h5p-action-bar.js",
+        "h5p-php-library/js/h5p-utils.js",
+        "h5p-php-library/js/h5p-data-view.js",
+        "Editor/scripts/h5p-editor.js",
+        "h5p-php-library/js/h5p-version.js",
+        "h5p-php-library/js/h5p-version.js",
+        "h5p-php-library/js/h5p-embed.js",
+        "h5p-php-library/js/h5p-utils.js",
+        "h5p-php-library/js/h5p-display-options.js"
+      ],
+      "styles": [
+        "h5p-editor-php-library/styles/css/application.css",
+        "h5p-editor-php-library/styles/css/fonts.css",
+        "h5p-editor-php-library/styles/css/h5p-hub-client.css"
+      ],
+      "messages": [
+        "h5p-extension-label"
+      ],
+      "dependencies": [
+        "jquery.cookie",
+        "jquery.tabIndex"
+      ]
+    },
+    "ext.H5pExtension.player":{
+      "styles":[
+        "h5p-php-library/styles/h5p.css"
+      ]
+    }
+  },
+  "ResourceFileModulePaths": {
+    "localBasePath": "",
+    "remoteExtPath": "H5pExtension"
   }
 }
