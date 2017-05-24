@@ -20,11 +20,18 @@ class SpecialH5pExtension extends SpecialPage{
 
 		# Do stuff
 
+		//TODO: initiate
+		include ('Editor/H5pExtensionAdmin.php');
+
+
 		$wikitext = 'H5P! <br />'.PHP_EOL;
 		$wikitext .= '<h5p>1</h5p><br />'.PHP_EOL;
 		$wikitext .= 'Testseite ist testierbar<br />'.PHP_EOL;
 		$wikitext .= 'UserID: '.$request->getSession()->getUser()->getId();
 
+
+
 		$output->addWikiText($wikitext);
+		$output->addModules('ext.H5pExtension.editor');
 	}
 }
